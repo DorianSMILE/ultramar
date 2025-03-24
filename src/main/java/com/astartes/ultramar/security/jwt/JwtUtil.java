@@ -57,11 +57,12 @@ public class JwtUtil {
     }
 
     // Génère un token à partir de l'Authentication (utilisé lors du login)
-    public String generateAccessToken(Authentication authentication) {
+    public String generateAccessToken(Authentication authentication, String role) {
         UserDetails userDetails = (UserDetails) authentication.getPrincipal();
         Key key = Keys.hmacShaKeyFor(SECRET_KEY.getBytes());
         return Jwts.builder()
                 .setSubject(userDetails.getUsername())
+                .claim("roles", role)
                 .setIssuedAt(new Date())
                 .setExpiration(new Date(System.currentTimeMillis() + ACCESS_TOKEN_EXPIRATION))
                 .signWith(key, SignatureAlgorithm.HS512)

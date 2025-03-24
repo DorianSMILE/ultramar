@@ -41,9 +41,9 @@ public class SecureRestController {
                             userDTO.password()
                     )
             );
-            String accessToken = jwtUtil.generateAccessToken(authentication);
-            String refreshToken = jwtUtil.generateRefreshToken(authentication);
             UserResponseDTO userResponseDTO = userService.getUserByName(userDTO.username());
+            String accessToken = jwtUtil.generateAccessToken(authentication, userResponseDTO.roleName());
+            String refreshToken = jwtUtil.generateRefreshToken(authentication);
             return ResponseEntity.ok(new JwtResponse(accessToken, refreshToken, userResponseDTO));
         } catch (AuthenticationException ex) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Échec de l'authentification");

@@ -49,6 +49,7 @@ public class SecurityConfig {
                         authz
                                 .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                                 .requestMatchers("/login", "/refresh").permitAll()
+                                .requestMatchers( "/admin").hasRole("ADMIN")
                                 .anyRequest().authenticated()
                 )
                 .exceptionHandling(exception ->
