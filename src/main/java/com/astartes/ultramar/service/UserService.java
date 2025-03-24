@@ -44,4 +44,17 @@ public class UserService {
                 .map(RoleMapper::toDTO)
                 .collect(Collectors.toList());
     }
+
+    public UserResponseDTO getUserByName(String username) {
+        User user = userRepository.findByUsername(username)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+        return UserMapper.toDTO(user);
+    }
+
+    // pour aff tout les user plus tard
+    public List<UserResponseDTO> getAllUsers() {
+        return userRepository.findAll().stream()
+                .map(UserMapper::toDTO)
+                .collect(Collectors.toList());
+    }
 }

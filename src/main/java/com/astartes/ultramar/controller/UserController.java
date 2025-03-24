@@ -22,7 +22,7 @@ public class UserController {
     }
 
     @PostMapping("/create")
-    public ResponseEntity<UserResponseDTO> createUltramarine(@Valid @RequestBody UserCreateDTO userDTO) {
+    public ResponseEntity<UserResponseDTO> createUser(@Valid @RequestBody UserCreateDTO userDTO) {
         UserResponseDTO saved = userService.createUser(userDTO.username(), userDTO.password(), userDTO.roleId());
         return ResponseEntity.ok(saved);
     }

@@ -1,8 +1,10 @@
 package com.astartes.ultramar.controller;
 
 import com.astartes.ultramar.DTO.UserDTO;
+import com.astartes.ultramar.DTO.UserResponseDTO;
 import com.astartes.ultramar.security.jwt.JwtResponse;
 import com.astartes.ultramar.security.jwt.JwtUtil;
+import com.astartes.ultramar.service.UserService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,7 +28,10 @@ public class SecureRestController {
     @Autowired
     private JwtUtil jwtUtil;
 
-    // Endpoint de login, il est recommandé d'utiliser POST pour recevoir les credentials
+    @Autowired
+    private UserService userService;
+
+    // Endpoint de login
     @PostMapping("/login")
     public ResponseEntity<?> login(@Valid @RequestBody UserDTO userDTO) {
         try {
@@ -38,7 +43,8 @@ public class SecureRestController {
             );
             String accessToken = jwtUtil.generateAccessToken(authentication);
             String refreshToken = jwtUtil.generateRefreshToken(authentication);
-            return ResponseEntity.ok(new JwtResponse(accessToken, refreshToken));
+            UserResponseDTO userResponseDTO = userService.getUserByName(userDTO.username());
+            return ResponseEntity.ok(new JwtResponse(accessToken, refreshToken, userResponseDTO));
         } catch (AuthenticationException ex) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Échec de l'authentification");
         }
