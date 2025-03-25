@@ -54,7 +54,12 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(UserRoleException.class)
     public ResponseEntity<String> handleRoleException(UserRoleException ex) {
-        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(ex.getMessage());
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ex.getMessage());
+    }
+
+    @ExceptionHandler(UserRoleException.class)
+    public ResponseEntity<String> handleUserRoleException(UserRoleException ex) {
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ex.getMessage());
     }
 
 }

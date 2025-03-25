@@ -68,11 +68,5 @@ public class SecurityConfig {
         return new BCryptPasswordEncoder();
     }
 
-    /*@Bean
-    CommandLineRunner initUsers(UserService userService) {
-        return args -> {
-            userService.createUser("", "");
-        };
-    }*/
 }
 

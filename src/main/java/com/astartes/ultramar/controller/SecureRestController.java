@@ -1,6 +1,6 @@
 package com.astartes.ultramar.controller;
 
-import com.astartes.ultramar.DTO.UserDTO;
+import com.astartes.ultramar.DTO.UserLoginDTO;
 import com.astartes.ultramar.DTO.UserResponseDTO;
 import com.astartes.ultramar.security.jwt.JwtResponse;
 import com.astartes.ultramar.security.jwt.JwtUtil;
@@ -33,15 +33,15 @@ public class SecureRestController {
 
     // Endpoint de login
     @PostMapping("/login")
-    public ResponseEntity<?> login(@Valid @RequestBody UserDTO userDTO) {
+    public ResponseEntity<?> login(@Valid @RequestBody UserLoginDTO userLoginDTO) {
         try {
             Authentication authentication = authenticationManager.authenticate(
                     new UsernamePasswordAuthenticationToken(
-                            userDTO.username(),
-                            userDTO.password()
+                            userLoginDTO.username(),
+                            userLoginDTO.password()
                     )
             );
-            UserResponseDTO userResponseDTO = userService.getUserByName(userDTO.username());
+            UserResponseDTO userResponseDTO = userService.getUserByName(userLoginDTO.username());
             String accessToken = jwtUtil.generateAccessToken(authentication, userResponseDTO.roleName());
             String refreshToken = jwtUtil.generateRefreshToken(authentication);
             return ResponseEntity.ok(new JwtResponse(accessToken, refreshToken, userResponseDTO));

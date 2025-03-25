@@ -4,6 +4,7 @@ import com.astartes.ultramar.DTO.RoleDTO;
 import com.astartes.ultramar.DTO.UserResponseDTO;
 import com.astartes.ultramar.entity.Role;
 import com.astartes.ultramar.entity.User;
+import com.astartes.ultramar.exception.UserNotFoundException;
 import com.astartes.ultramar.exception.UserRoleException;
 import com.astartes.ultramar.mapper.RoleMapper;
 import com.astartes.ultramar.mapper.UserMapper;
@@ -47,11 +48,11 @@ public class UserService {
 
     public UserResponseDTO getUserByName(String username) {
         User user = userRepository.findByUsername(username)
-                .orElseThrow(() -> new RuntimeException("User not found"));
+                .orElseThrow(() -> new UserNotFoundException("User not found"));
         return UserMapper.toDTO(user);
     }
 
-    // pour aff tout les user plus tard
+    // pour aff tout les users plus tard
     public List<UserResponseDTO> getAllUsers() {
         return userRepository.findAll().stream()
                 .map(UserMapper::toDTO)
