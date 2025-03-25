@@ -2,7 +2,6 @@ package com.astartes.ultramar.controller;
 
 import com.astartes.ultramar.DTO.RoleDTO;
 import com.astartes.ultramar.DTO.UserCreateDTO;
-import com.astartes.ultramar.DTO.UserDTO;
 import com.astartes.ultramar.DTO.UserResponseDTO;
 import com.astartes.ultramar.service.UserService;
 import jakarta.validation.Valid;
