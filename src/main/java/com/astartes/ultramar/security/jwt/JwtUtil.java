@@ -132,6 +132,4 @@ public class JwtUtil {
             throw new RuntimeException("Invalid refresh token", e);
         }
     }
-
-
 }
