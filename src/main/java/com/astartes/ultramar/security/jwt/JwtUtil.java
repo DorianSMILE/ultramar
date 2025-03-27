@@ -5,6 +5,7 @@ import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
@@ -19,16 +20,19 @@ import java.util.Map;
 @Service
 public class JwtUtil {
 
-    private static final String SECRET_KEY = "0e6e1158bdee72d6437940f9db1768a0abf9284f67901f3de18f5f634a1734ffb62226f36613c72e7b6a79f5b8689aa99d4e515e6505457bb2556321a49d010e";
+    private final String secretKey;
 
     private static final long ACCESS_TOKEN_EXPIRATION = 60000; // 1 minute
     private static final long REFRESH_TOKEN_EXPIRATION = 600000; // 10 minutes
 
+    public JwtUtil(@Value("${jwt.secret}") String secretKey) {
+        this.secretKey = secretKey;
+    }
 
     // Extrait tous les claims du token
     private Claims extractAllClaims(String token) {
         try {
-            SecretKey key = Keys.hmacShaKeyFor(SECRET_KEY.getBytes());
+            SecretKey key = Keys.hmacShaKeyFor(secretKey.getBytes());
             return Jwts.parser()
                     .verifyWith(key)
                     .build()
@@ -67,7 +71,7 @@ public class JwtUtil {
         claims.put("roles", role);
         claims.put("iat", new Date());
         claims.put("exp", new Date(System.currentTimeMillis() + ACCESS_TOKEN_EXPIRATION));
-        Key key = Keys.hmacShaKeyFor(SECRET_KEY.getBytes());
+        Key key = Keys.hmacShaKeyFor(secretKey.getBytes());
         return Jwts.builder()
                 .claims(claims)
                 .signWith(key)
@@ -81,7 +85,7 @@ public class JwtUtil {
         claims.put("iat", new Date());
         claims.put("exp", new Date(System.currentTimeMillis() + REFRESH_TOKEN_EXPIRATION));
         claims.put("token_type", "refresh");
-        Key key = Keys.hmacShaKeyFor(SECRET_KEY.getBytes());
+        Key key = Keys.hmacShaKeyFor(secretKey.getBytes());
         return Jwts.builder()
                 .claims(claims)
                 .signWith(key)
@@ -99,7 +103,7 @@ public class JwtUtil {
             updatedClaims.remove("token_type");
             updatedClaims.put("iat", new Date());
             updatedClaims.put("exp", new Date(System.currentTimeMillis() + ACCESS_TOKEN_EXPIRATION));
-            Key key = Keys.hmacShaKeyFor(SECRET_KEY.getBytes());
+            Key key = Keys.hmacShaKeyFor(secretKey.getBytes());
             return Jwts.builder()
                     .claims(updatedClaims)
                     .signWith(key)
@@ -118,7 +122,7 @@ public class JwtUtil {
             Map<String, Object> updatedClaims = new HashMap<>(claims);
             updatedClaims.put("iat", new Date());
             updatedClaims.put("exp", new Date(System.currentTimeMillis() + REFRESH_TOKEN_EXPIRATION));
-            Key key = Keys.hmacShaKeyFor(SECRET_KEY.getBytes());
+            Key key = Keys.hmacShaKeyFor(secretKey.getBytes());
             updatedClaims.put("token_type", "refresh");
             return Jwts.builder()
                     .claims(updatedClaims)
