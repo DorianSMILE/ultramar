@@ -51,7 +51,7 @@ public class UltramarineService {
      * @return
      */
     public List<UltramarineDTO> getAllByName(String name) {
-        return repository.findByName(name)
+        return repository.findByNameContainingIgnoreCase(name)
                 .stream()
                 .map(UltramarineMapper::toDTO)
                 .toList();

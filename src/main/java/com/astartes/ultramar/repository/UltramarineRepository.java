@@ -8,5 +8,5 @@ import java.util.Optional;
 
 @Repository
 public interface UltramarineRepository extends JpaRepository<Ultramarine, Integer> {
-    Optional<Ultramarine> findByName(String name);
+    Optional<Ultramarine> findByNameContainingIgnoreCase(String name);
 }
