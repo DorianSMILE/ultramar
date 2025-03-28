@@ -53,7 +53,6 @@ public class SecureRestController {
     // Endpoint pour rafraîchir le token
     @GetMapping("/refresh")
     public ResponseEntity<?> refresh(HttpServletRequest request) {
-        System.out.println(request);
         String authHeader = request.getHeader("Authorization");
         if (authHeader != null && authHeader.startsWith("Bearer ")) {
             String refreshToken = authHeader.substring(7);
