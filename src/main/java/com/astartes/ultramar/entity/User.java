@@ -3,6 +3,8 @@ package com.astartes.ultramar.entity;
 import jakarta.persistence.*;
 import lombok.Data;
 
+import java.util.UUID;
+
 @Data
 @Entity
 @Table(name = "users")
@@ -16,6 +18,8 @@ public class User {
     private String username;
 
     private String password;
+
+    private UUID UUID;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name="role_id", referencedColumnName = "id", nullable=false)
