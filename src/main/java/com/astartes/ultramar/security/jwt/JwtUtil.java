@@ -2,6 +2,7 @@ package com.astartes.ultramar.security.jwt;
 
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.ExpiredJwtException;
+import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
 import lombok.extern.slf4j.Slf4j;
@@ -51,7 +52,7 @@ public class JwtUtil {
         } catch (ExpiredJwtException e) {
             log.error("Token expiré : {}", e.getMessage());
             throw e;
-        } catch (Exception e) {
+        } catch (JwtException e) {
             log.error("Token invalide : {}", e.getMessage());
             throw new RuntimeException(INVALID_JWT, e);
         }
@@ -75,31 +76,39 @@ public class JwtUtil {
 
     // Génère un token à partir de l'Authentication (utilisé lors du login)
     public String generateAccessToken(Authentication authentication, String role) {
-        UserDetails userDetails = (UserDetails) authentication.getPrincipal();
-        Map<String, Object> claims = new HashMap<>();
-        claims.put(SUB, userDetails.getUsername());
-        claims.put(ROLES, role);
-        claims.put(IAT, new Date());
-        claims.put(EXP, new Date(System.currentTimeMillis() + ACCESS_TOKEN_EXPIRATION));
-        Key key = Keys.hmacShaKeyFor(secretKey.getBytes());
-        return Jwts.builder()
-                .claims(claims)
-                .signWith(key)
-                .compact();
+        try {
+            UserDetails userDetails = (UserDetails) authentication.getPrincipal();
+            Map<String, Object> claims = new HashMap<>();
+            claims.put(SUB, userDetails.getUsername());
+            claims.put(ROLES, role);
+            claims.put(IAT, new Date());
+            claims.put(EXP, new Date(System.currentTimeMillis() + ACCESS_TOKEN_EXPIRATION));
+            Key key = Keys.hmacShaKeyFor(secretKey.getBytes());
+            return Jwts.builder()
+                    .claims(claims)
+                    .signWith(key)
+                    .compact();
+        } catch (JwtException e) {
+            throw new RuntimeException(INVALID_JWT, e);
+        }
     }
 
     public String generateRefreshToken(Authentication authentication) {
-        UserDetails userDetails = (UserDetails) authentication.getPrincipal();
-        Map<String, Object> claims = new HashMap<>();
-        claims.put(SUB, userDetails.getUsername());
-        claims.put(IAT, new Date());
-        claims.put(EXP, new Date(System.currentTimeMillis() + REFRESH_TOKEN_EXPIRATION));
-        claims.put(TOKEN_TYPE, REFRESH);
-        Key key = Keys.hmacShaKeyFor(secretKey.getBytes());
-        return Jwts.builder()
-                .claims(claims)
-                .signWith(key)
-                .compact();
+        try {
+            UserDetails userDetails = (UserDetails) authentication.getPrincipal();
+            Map<String, Object> claims = new HashMap<>();
+            claims.put(SUB, userDetails.getUsername());
+            claims.put(IAT, new Date());
+            claims.put(EXP, new Date(System.currentTimeMillis() + REFRESH_TOKEN_EXPIRATION));
+            claims.put(TOKEN_TYPE, REFRESH);
+            Key key = Keys.hmacShaKeyFor(secretKey.getBytes());
+            return Jwts.builder()
+                    .claims(claims)
+                    .signWith(key)
+                    .compact();
+        } catch (JwtException e) {
+            throw new RuntimeException(INVALID_REFRESH_TOKEN, e);
+        }
     }
 
     // Rafraîchit un token existant (en réinitialisant la date d'émission et d'expiration)
@@ -118,7 +127,7 @@ public class JwtUtil {
                     .claims(updatedClaims)
                     .signWith(key)
                     .compact();
-        } catch (Exception e) {
+        } catch (JwtException e) {
             throw new RuntimeException(INVALID_REFRESH_TOKEN, e);
         }
     }
@@ -138,7 +147,7 @@ public class JwtUtil {
                     .claims(updatedClaims)
                     .signWith(key)
                     .compact();
-        } catch (Exception e) {
+        } catch (JwtException e) {
             throw new RuntimeException(INVALID_REFRESH_TOKEN, e);
         }
     }
