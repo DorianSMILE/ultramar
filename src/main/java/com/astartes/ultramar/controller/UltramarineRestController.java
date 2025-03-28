@@ -31,8 +31,8 @@ public class UltramarineRestController {
         return ResponseEntity.ok(saved);
     }
 
-    @GetMapping("/search/{name}")
-    public ResponseEntity<List<UltramarineDTO>> getAllByName(@PathVariable @Pattern(regexp = "^[A-Za-zÀ-ÿ\\s-]+$") String name) {
+    @GetMapping("/search")
+    public ResponseEntity<List<UltramarineDTO>> getAllByName(@RequestParam @Pattern(regexp = "^[A-Za-zÀ-ÿ\\s-]+$") String name) {
         List<UltramarineDTO> results = ultramarineService.getAllByName(name);
         return ResponseEntity.ok(results);
     }

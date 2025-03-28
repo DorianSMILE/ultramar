@@ -20,6 +20,16 @@ import java.util.Map;
 @Service
 public class JwtUtil {
 
+    public static final String IAT = "iat";
+    public static final String EXP = "exp";
+    public static final String TOKEN_TYPE = "token_type";
+    public static final String SUB = "sub";
+    public static final String ROLES = "roles";
+    public static final String REFRESH = "refresh";
+    public static final String NOT_A_REFRESH_TOKEN = "Ce token n'est pas un refresh token";
+    public static final String INVALID_REFRESH_TOKEN = "Invalid refresh token";
+    public static final String INVALID_JWT = "Invalid JWT";
+
     private final String secretKey;
 
     private static final long ACCESS_TOKEN_EXPIRATION = 60000; // 1 minute
@@ -43,7 +53,7 @@ public class JwtUtil {
             throw e;
         } catch (Exception e) {
             log.error("Token invalide : {}", e.getMessage());
-            throw new RuntimeException("Invalid JWT", e);
+            throw new RuntimeException(INVALID_JWT, e);
         }
     }
 
@@ -67,10 +77,10 @@ public class JwtUtil {
     public String generateAccessToken(Authentication authentication, String role) {
         UserDetails userDetails = (UserDetails) authentication.getPrincipal();
         Map<String, Object> claims = new HashMap<>();
-        claims.put("sub", userDetails.getUsername());
-        claims.put("roles", role);
-        claims.put("iat", new Date());
-        claims.put("exp", new Date(System.currentTimeMillis() + ACCESS_TOKEN_EXPIRATION));
+        claims.put(SUB, userDetails.getUsername());
+        claims.put(ROLES, role);
+        claims.put(IAT, new Date());
+        claims.put(EXP, new Date(System.currentTimeMillis() + ACCESS_TOKEN_EXPIRATION));
         Key key = Keys.hmacShaKeyFor(secretKey.getBytes());
         return Jwts.builder()
                 .claims(claims)
@@ -81,10 +91,10 @@ public class JwtUtil {
     public String generateRefreshToken(Authentication authentication) {
         UserDetails userDetails = (UserDetails) authentication.getPrincipal();
         Map<String, Object> claims = new HashMap<>();
-        claims.put("sub", userDetails.getUsername());
-        claims.put("iat", new Date());
-        claims.put("exp", new Date(System.currentTimeMillis() + REFRESH_TOKEN_EXPIRATION));
-        claims.put("token_type", "refresh");
+        claims.put(SUB, userDetails.getUsername());
+        claims.put(IAT, new Date());
+        claims.put(EXP, new Date(System.currentTimeMillis() + REFRESH_TOKEN_EXPIRATION));
+        claims.put(TOKEN_TYPE, REFRESH);
         Key key = Keys.hmacShaKeyFor(secretKey.getBytes());
         return Jwts.builder()
                 .claims(claims)
@@ -96,40 +106,40 @@ public class JwtUtil {
     public String refreshAccessToken(String refreshToken) {
         try {
             Claims claims = extractAllClaims(refreshToken);
-            if (!"refresh".equals(claims.get("token_type"))) {
-                throw new RuntimeException("Ce token n'est pas un refresh token");
+            if (!REFRESH.equals(claims.get(TOKEN_TYPE))) {
+                throw new RuntimeException(NOT_A_REFRESH_TOKEN);
             }
             Map<String, Object> updatedClaims = new HashMap<>(claims);
-            updatedClaims.remove("token_type");
-            updatedClaims.put("iat", new Date());
-            updatedClaims.put("exp", new Date(System.currentTimeMillis() + ACCESS_TOKEN_EXPIRATION));
+            updatedClaims.remove(TOKEN_TYPE);
+            updatedClaims.put(IAT, new Date());
+            updatedClaims.put(EXP, new Date(System.currentTimeMillis() + ACCESS_TOKEN_EXPIRATION));
             Key key = Keys.hmacShaKeyFor(secretKey.getBytes());
             return Jwts.builder()
                     .claims(updatedClaims)
                     .signWith(key)
                     .compact();
         } catch (Exception e) {
-            throw new RuntimeException("Invalid refresh token", e);
+            throw new RuntimeException(INVALID_REFRESH_TOKEN, e);
         }
     }
 
     public String refreshRefreshToken(String refreshToken) {
         try {
             Claims claims = extractAllClaims(refreshToken);
-            if (!"refresh".equals(claims.get("token_type"))) {
-                throw new RuntimeException("Ce token n'est pas un refresh token");
+            if (!REFRESH.equals(claims.get(TOKEN_TYPE))) {
+                throw new RuntimeException(NOT_A_REFRESH_TOKEN);
             }
             Map<String, Object> updatedClaims = new HashMap<>(claims);
-            updatedClaims.put("iat", new Date());
-            updatedClaims.put("exp", new Date(System.currentTimeMillis() + REFRESH_TOKEN_EXPIRATION));
+            updatedClaims.put(IAT, new Date());
+            updatedClaims.put(EXP, new Date(System.currentTimeMillis() + REFRESH_TOKEN_EXPIRATION));
             Key key = Keys.hmacShaKeyFor(secretKey.getBytes());
-            updatedClaims.put("token_type", "refresh");
+            updatedClaims.put(TOKEN_TYPE, REFRESH);
             return Jwts.builder()
                     .claims(updatedClaims)
                     .signWith(key)
                     .compact();
         } catch (Exception e) {
-            throw new RuntimeException("Invalid refresh token", e);
+            throw new RuntimeException(INVALID_REFRESH_TOKEN, e);
         }
     }
 }
