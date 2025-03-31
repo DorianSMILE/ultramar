@@ -51,7 +51,7 @@ public class SecurityConfig {
                 .authorizeHttpRequests(authz ->
                         authz
                                 .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
-                                .requestMatchers("/login", "/refresh").permitAll()
+                                .requestMatchers("/login", "/refresh", "/admin/firstConnexion/**", "/admin/changePassword").permitAll()
                                 .requestMatchers( "/admin").hasRole("ADMIN")
                                 .anyRequest().authenticated()
                 )

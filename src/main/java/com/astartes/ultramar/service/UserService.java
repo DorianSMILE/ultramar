@@ -14,6 +14,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -37,6 +38,7 @@ public class UserService {
         user.setPassword(passwordEncoder.encode(rawPassword));
         user.setRole(role);
         user.setUUID(UUID.randomUUID());
+        System.out.println(user.getUUID());
         User savedUser = userRepository.save(user);
         return UserMapper.toDTO(savedUser);
     }
@@ -60,4 +62,23 @@ public class UserService {
                 .map(UserMapper::toDTO)
                 .collect(Collectors.toList());
     }
+
+    public Optional<UUID> verifUuidExist(UUID token) {
+        return userRepository.findByUUID(token)
+                .map(User::getUUID);
+    }
+
+    public void changePassword(UUID uuid, String password) {
+        Optional<User> optionalUser = userRepository.findByUUID(uuid);
+        if (optionalUser.isPresent()) {
+            User user = optionalUser.get();
+            user.setPassword(passwordEncoder.encode(password));
+            user.setUUID(null);
+            userRepository.save(user);
+        } else {
+            //TODO : faire un changePasswordException
+            throw new IllegalArgumentException("User not found with given UUID: " + uuid);
+        }
+    }
+
 }
