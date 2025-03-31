@@ -42,10 +42,7 @@ public class UserService {
         user.setUUID(UUID.randomUUID());
         User savedUser = userRepository.save(user);
 
-        String redirectUrl = "http://localhost:4200/admin/firstConnexion?uuid=" + user.getUUID();
-        String subject = "Première connexion - Changez votre mot de passe";
-        String content = "Bonjour,\n\nMerci de créer votre mot de passe en cliquant sur le lien suivant :\n" + redirectUrl;
-        emailService.sendEmail(subject, content);
+        emailService.sendEmail(savedUser.getUUID());
 
         return UserMapper.toDTO(savedUser);
     }
@@ -59,7 +56,7 @@ public class UserService {
 
     public UserResponseDTO getUserByName(String username) {
         User user = userRepository.findByUsername(username)
-                .orElseThrow(() -> new UserNotFoundException("User not found"));
+                .orElseThrow(() -> new UserNotFoundException(username));
         return UserMapper.toDTO(user);
     }
 
@@ -76,8 +73,7 @@ public class UserService {
             user.setUUID(null);
             userRepository.save(user);
         } else {
-            //TODO : faire un changePasswordException
-            throw new IllegalArgumentException("User not found with given UUID: " + uuid);
+            throw new UserNotFoundException(uuid.toString());
         }
     }
 

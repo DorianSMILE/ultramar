@@ -5,6 +5,8 @@ import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.stereotype.Service;
 
+import java.util.UUID;
+
 @Service
 public class EmailService {
 
@@ -15,17 +17,11 @@ public class EmailService {
         this.mailSender = mailSender;
     }
 
-    /**
-     * Envoie un e-mail simple.
-     *
-     * @param subject Objet de l'e-mail.
-     * @param text    Contenu de l'e-mail.
-     */
-    public void sendEmail(String subject, String text) {
+    public void sendEmail(UUID uuid) {
         SimpleMailMessage message = new SimpleMailMessage();
         message.setTo("dorian.sonzogni@smile.fr");
-        message.setSubject(subject);
-        message.setText(text);
+        message.setSubject("Première connexion - Changez votre mot de passe");
+        message.setText("Bonjour,\n\nMerci de créer votre mot de passe en cliquant sur le lien suivant :\n" + "http://localhost:4200/admin/firstConnexion?uuid=" + uuid);
         mailSender.send(message);
     }
 
