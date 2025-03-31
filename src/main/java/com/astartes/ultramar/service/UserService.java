@@ -23,11 +23,13 @@ public class UserService {
     private final UserRepository userRepository;
     private final RoleRepository roleRepository;
     private final PasswordEncoder passwordEncoder;
+    private final EmailService emailService;
 
-    public UserService(UserRepository userRepository, RoleRepository roleRepository, PasswordEncoder passwordEncoder) {
+    public UserService(UserRepository userRepository, RoleRepository roleRepository, PasswordEncoder passwordEncoder, EmailService emailService) {
         this.userRepository = userRepository;
         this.roleRepository = roleRepository;
         this.passwordEncoder = passwordEncoder;
+        this.emailService = emailService;
     }
 
     public UserResponseDTO createUser(String username, String rawPassword, Long roleId) {
@@ -38,8 +40,13 @@ public class UserService {
         user.setPassword(passwordEncoder.encode(rawPassword));
         user.setRole(role);
         user.setUUID(UUID.randomUUID());
-        System.out.println(user.getUUID());
         User savedUser = userRepository.save(user);
+
+        String redirectUrl = "http://localhost:4200/admin/firstConnexion?uuid=" + user.getUUID();
+        String subject = "Première connexion - Changez votre mot de passe";
+        String content = "Bonjour,\n\nMerci de créer votre mot de passe en cliquant sur le lien suivant :\n" + redirectUrl;
+        emailService.sendEmail(subject, content);
+
         return UserMapper.toDTO(savedUser);
     }
 
@@ -54,13 +61,6 @@ public class UserService {
         User user = userRepository.findByUsername(username)
                 .orElseThrow(() -> new UserNotFoundException("User not found"));
         return UserMapper.toDTO(user);
-    }
-
-    // pour aff tout les users plus tard
-    public List<UserResponseDTO> getAllUsers() {
-        return userRepository.findAll().stream()
-                .map(UserMapper::toDTO)
-                .collect(Collectors.toList());
     }
 
     public Optional<UUID> verifUuidExist(UUID token) {

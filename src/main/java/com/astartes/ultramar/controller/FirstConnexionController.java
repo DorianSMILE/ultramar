@@ -36,7 +36,5 @@ public class FirstConnexionController {
         userService.changePassword(changePasswordDTO.uuid(), changePasswordDTO.password());
         return ResponseEntity.ok("redirectUrl");
     }
-    // Ou add bool is changed pour redirect vers le change password avant de laisser le user navigué sur l'app
-    // Add /sendMail pour send le lien avec l'uid lors du CreateUser
 
 }
