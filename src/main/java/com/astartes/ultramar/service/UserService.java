@@ -24,12 +24,16 @@ public class UserService {
     private final RoleRepository roleRepository;
     private final PasswordEncoder passwordEncoder;
     private final EmailService emailService;
+    private final RoleMapper roleMapper;
+    private final UserMapper userMapper;
 
-    public UserService(UserRepository userRepository, RoleRepository roleRepository, PasswordEncoder passwordEncoder, EmailService emailService) {
+    public UserService(UserRepository userRepository, RoleRepository roleRepository, PasswordEncoder passwordEncoder, EmailService emailService, RoleMapper roleMapper, UserMapper userMapper) {
         this.userRepository = userRepository;
         this.roleRepository = roleRepository;
         this.passwordEncoder = passwordEncoder;
         this.emailService = emailService;
+        this.roleMapper = roleMapper;
+        this.userMapper = userMapper;
     }
 
     public UserResponseDTO createUser(String username, String rawPassword, Long roleId) {
@@ -44,20 +48,20 @@ public class UserService {
 
         emailService.sendEmail(savedUser.getUUID());
 
-        return UserMapper.toDTO(savedUser);
+        return userMapper.toDTO(savedUser);
     }
 
     public List<RoleDTO> getAllRole() {
         List<Role> roles = roleRepository.findAll();
         return roles.stream()
-                .map(RoleMapper::toDTO)
+                .map(roleMapper::toDTO)
                 .collect(Collectors.toList());
     }
 
     public UserResponseDTO getUserByName(String username) {
         User user = userRepository.findByUsername(username)
                 .orElseThrow(() -> new UserNotFoundException(username));
-        return UserMapper.toDTO(user);
+        return userMapper.toDTO(user);
     }
 
     public Optional<UUID> verifUuidExist(UUID token) {

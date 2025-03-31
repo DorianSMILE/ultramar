@@ -16,9 +16,11 @@ import java.util.List;
 public class UltramarineService {
 
     private final UltramarineRepository repository;
+    private final UltramarineMapper ultramarineMapper;
 
-    public UltramarineService(UltramarineRepository repository) {
+    public UltramarineService(UltramarineRepository repository, UltramarineMapper ultramarineMapper) {
         this.repository = repository;
+        this.ultramarineMapper = ultramarineMapper;
     }
 
     /**
@@ -26,9 +28,9 @@ public class UltramarineService {
      */
     public UltramarineDTO create(UltramarineDTO dto) {
         try {
-            Ultramarine entity = UltramarineMapper.toEntity(dto);
+            Ultramarine entity = ultramarineMapper.toEntity(dto);
             entity = repository.save(entity);
-            return UltramarineMapper.toDTO(entity);
+            return ultramarineMapper.toDTO(entity);
         } catch (Exception e) {
             throw new UltramarineCreationException("Error creating Ultramarine");
         }
@@ -41,7 +43,7 @@ public class UltramarineService {
     public List<UltramarineDTO> getAll() {
         return repository.findAll()
                 .stream()
-                .map(UltramarineMapper::toDTO)
+                .map(ultramarineMapper::toDTO)
                 .toList();
     }
 
@@ -53,7 +55,7 @@ public class UltramarineService {
     public List<UltramarineDTO> getAllByName(String name) {
         return repository.findByNameContainingIgnoreCase(name)
                 .stream()
-                .map(UltramarineMapper::toDTO)
+                .map(ultramarineMapper::toDTO)
                 .toList();
     }
 
@@ -64,7 +66,7 @@ public class UltramarineService {
      */
     public UltramarineDTO getById(int id) {
         return repository.findById(id)
-                .map(UltramarineMapper::toDTO)
+                .map(ultramarineMapper::toDTO)
                 .orElseThrow(() -> new UltramarineNotFoundException(id));
     }
 
@@ -79,7 +81,7 @@ public class UltramarineService {
             existing.setName(dto.name());
             existing.setGrade(dto.grade());
             repository.save(existing);
-            return UltramarineMapper.toDTO(existing);
+            return ultramarineMapper.toDTO(existing);
         }).orElseThrow(() -> new UltramarineUpdateException(id));
     }
 
