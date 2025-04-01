@@ -9,6 +9,7 @@ import com.astartes.ultramar.exception.UltramarineUpdateException;
 import com.astartes.ultramar.mapper.UltramarineMapper;
 import com.astartes.ultramar.repository.UltramarineRepository;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -26,6 +27,7 @@ public class UltramarineService {
     /**
      * Créer un Ultramarine
      */
+    @Transactional
     public UltramarineDTO create(UltramarineDTO dto) {
         try {
             Ultramarine entity = ultramarineMapper.toEntity(dto);
@@ -76,6 +78,7 @@ public class UltramarineService {
      * @param dto
      * @return
      */
+    @Transactional
     public UltramarineDTO update(int id, UltramarineDTO dto) {
         return repository.findById(id).map(existing -> {
             existing.setName(dto.name());
@@ -90,6 +93,7 @@ public class UltramarineService {
      * @param id
      * @return
      */
+    @Transactional
     public void delete(int id) {
         if (repository.existsById(id)) {
             repository.deleteById(id);

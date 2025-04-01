@@ -12,6 +12,7 @@ import com.astartes.ultramar.repository.RoleRepository;
 import com.astartes.ultramar.repository.UserRepository;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Optional;
@@ -36,6 +37,7 @@ public class UserService {
         this.userMapper = userMapper;
     }
 
+    @Transactional
     public UserResponseDTO createUser(String username, String rawPassword, Long roleId) {
         Role role = roleRepository.findById(roleId)
                 .orElseThrow(() -> new UserRoleException(roleId));
@@ -69,6 +71,7 @@ public class UserService {
                 .map(User::getUUID);
     }
 
+    @Transactional
     public void changePassword(UUID uuid, String password) {
         Optional<User> optionalUser = userRepository.findByUUID(uuid);
         if (optionalUser.isPresent()) {
