@@ -3,6 +3,8 @@ package com.astartes.ultramar.DTO;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
 
+import java.util.List;
+
 public record UltramarineDTO(
     Integer id,
     @NotBlank
@@ -10,9 +12,10 @@ public record UltramarineDTO(
     String name,
     @NotBlank
     @Pattern(regexp = "^[A-Za-zÀ-ÿ\\s-]+$", message = "Grade should contain only letters, spaces, or hyphens")
-    String grade
+    String grade,
+    List<EquipmentDTO> equipments
 ) {
     public UltramarineDTO() {
-        this(null, "", "");
+        this(null, "", "", List.of());
     }
 }
