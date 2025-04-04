@@ -2,6 +2,7 @@ package com.astartes.ultramar.mapper;
 
 import com.astartes.ultramar.DTO.EquipmentDTO;
 import com.astartes.ultramar.entity.Equipment;
+import com.astartes.ultramar.enumeration.EquipmentTypeEnum;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -16,7 +17,7 @@ public class EquipmentMapper {
             equipment.setId(dto.id());
         }
         equipment.setName(dto.name());
-        equipment.setEquipmentType(dto.equipmentType());
+        equipment.setEquipmentType(EquipmentTypeEnum.valueOf(String.valueOf(dto.equipmentType())));
         return equipment;
     }
 

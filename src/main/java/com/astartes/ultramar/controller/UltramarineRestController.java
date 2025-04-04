@@ -43,9 +43,9 @@ public class UltramarineRestController {
         return ResponseEntity.ok(dto);
     }
 
-    @PutMapping("/{id}")
-    public ResponseEntity<UltramarineDTO> update(@PathVariable int id, @Valid @RequestBody UltramarineDTO ultramarineDTO) {
-        UltramarineDTO updatedUltramarine = ultramarineService.update(id, ultramarineDTO);
+    @PutMapping("/")
+    public ResponseEntity<UltramarineDTO> update(@Valid @RequestBody UltramarineDTO ultramarineDTO) {
+        UltramarineDTO updatedUltramarine = ultramarineService.update(ultramarineDTO);
         return ResponseEntity.ok(updatedUltramarine);
     }
 
