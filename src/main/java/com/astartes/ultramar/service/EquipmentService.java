@@ -54,6 +54,9 @@ public class EquipmentService {
         ultramarine.getEquipments().clear();
         if (ultramarineDTO.equipments() != null) {
             for (EquipmentDTO equipmentDTO : ultramarineDTO.equipments()) {
+                if (equipmentDTO.name() == null || equipmentDTO.name().trim().isEmpty()) {
+                    continue;
+                }
                 Equipment equipment = equipmentRepository
                         .findByEquipmentTypeAndName(equipmentDTO.equipmentType(), equipmentDTO.name())
                         .orElseThrow(() -> new EquipmentNotFoundException(equipmentDTO.equipmentType() + " - " + equipmentDTO.name()));
