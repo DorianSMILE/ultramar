@@ -78,11 +78,11 @@ public class UltramarineService {
      * @return
      */
     @Transactional
-    public UltramarineDTO update(UltramarineDTO dto) {
+    public UltramarineDTO updateUltramarine(UltramarineDTO dto) {
         return repository.findById(dto.id()).map(existing -> {
             existing.setName(dto.name());
             existing.setGrade(dto.grade());
-            repository.save(existing);
+            repository.saveAndFlush(existing);
             return ultramarineMapper.toDTO(existing);
         }).orElseThrow(() -> new UltramarineUpdateException(dto.id()));
     }

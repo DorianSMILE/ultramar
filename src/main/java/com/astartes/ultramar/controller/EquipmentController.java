@@ -34,10 +34,4 @@ public class EquipmentController {
         return equipmentService.getUltramarineEquipments(ultramarineDTO);
     }
 
-    @PutMapping("/ultramarine")
-    public ResponseEntity<String> updateUltramarineEquipments(@Valid @RequestBody UltramarineDTO ultramarineDTO) {
-        equipmentService.updateUltramarineEquipments(ultramarineDTO);
-        return ResponseEntity.ok("Super");
-    }
-
 }

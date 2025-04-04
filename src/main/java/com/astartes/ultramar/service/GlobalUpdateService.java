@@ -14,62 +14,46 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 @Service
-public class EquipmentService {
+public class GlobalUpdateService {
 
-    private final EquipmentRepository equipmentRepository;
     private final UltramarineRepository ultramarineRepository;
+    private final EquipmentRepository equipmentRepository;
     private final UltramarineMapper ultramarineMapper;
 
-    public EquipmentService(EquipmentRepository equipmentRepository, UltramarineRepository ultramarineRepository, UltramarineMapper ultramarineMapper) {
-        this.equipmentRepository = equipmentRepository;
+    public GlobalUpdateService(UltramarineRepository ultramarineRepository, EquipmentRepository equipmentRepository, UltramarineMapper ultramarineMapper) {
         this.ultramarineRepository = ultramarineRepository;
+        this.equipmentRepository = equipmentRepository;
         this.ultramarineMapper = ultramarineMapper;
     }
 
-    public Map<EquipmentTypeEnum, List<String>> getAvailableEquipmentsGroupedByType() {
-        return equipmentRepository.findAll()
-                .stream()
-                .collect(Collectors.groupingBy(
-                        Equipment::getEquipmentType,
-                        Collectors.mapping(Equipment::getName, Collectors.toList())
-                ));
-    }
-
-    public Map<EquipmentTypeEnum, String> getUltramarineEquipments(UltramarineDTO ultramarineDTO) {
-        return ultramarineDTO.equipments()
-                .stream()
-                .collect(Collectors.toMap(
-                        EquipmentDTO::equipmentType,
-                        EquipmentDTO::name,
-                        (existing, replacement) -> existing
-                ));
-    }
-
     @Transactional
-    public UltramarineDTO updateUltramarineEquipments(UltramarineDTO dto) {
+    public UltramarineDTO updateGlobal(UltramarineDTO dto) {
         Ultramarine ultramarine = ultramarineRepository.findById(dto.id())
                 .orElseThrow(() -> new UltramarineUpdateException(dto.id()));
 
-        ultramarine.getEquipments().clear();
+        ultramarine.setName(dto.name());
+        ultramarine.setGrade(dto.grade());
 
         Map<EquipmentTypeEnum, Equipment> newEquipments = new HashMap<>();
         if (dto.equipments() != null) {
             for (EquipmentDTO equipmentDTO : dto.equipments()) {
-                Equipment equipment = equipmentRepository.findByEquipmentTypeAndName(
-                                equipmentDTO.equipmentType(),
-                                equipmentDTO.name())
+                if (equipmentDTO.name() == null || equipmentDTO.name().trim().isEmpty()) {
+                    continue;
+                }
+                EquipmentTypeEnum typeEnum = equipmentDTO.equipmentType();
+                Equipment equipment = equipmentRepository.findByEquipmentTypeAndName(typeEnum, equipmentDTO.name())
                         .orElseThrow(() -> new EquipmentNotFoundException(
                                 equipmentDTO.equipmentType() + " - " + equipmentDTO.name()));
                 newEquipments.put(equipment.getEquipmentType(), equipment);
             }
         }
         ultramarine.setEquipments(newEquipments);
-        ultramarineRepository.saveAndFlush(ultramarine);
-        return ultramarineMapper.toDTO(ultramarine);
+
+        Ultramarine saved = ultramarineRepository.saveAndFlush(ultramarine);
+        return ultramarineMapper.toDTO(saved);
     }
+
 }

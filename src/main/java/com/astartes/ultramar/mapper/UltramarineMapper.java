@@ -37,15 +37,12 @@ public class UltramarineMapper {
         return new Ultramarine(dto.name(), dto.grade(), equipmentMap);
     }
 
-    public UltramarineDTO toDTO(Ultramarine entity) {
-        if (entity == null) return null;
-
-        List<EquipmentDTO> equipmentDTOList = entity.getEquipments() != null
-                ? entity.getEquipments().values().stream()
-                .map(equipmentMapper::toDto)
-                .toList()
-                : List.of();
-
-        return new UltramarineDTO(entity.getId(), entity.getName(), entity.getGrade(), equipmentDTOList);
+    public UltramarineDTO toDTO(Ultramarine ultramarine) {
+        Map<EquipmentTypeEnum, Equipment> equipments = new HashMap<>(ultramarine.getEquipments());
+        List<EquipmentDTO> equipmentDTOs = equipments.values().stream()
+                .map(equipment -> new EquipmentDTO(equipment.getId(), equipment.getName(), equipment.getEquipmentType()))
+                .collect(Collectors.toList());
+        return new UltramarineDTO(ultramarine.getId(), ultramarine.getName(), ultramarine.getGrade(), equipmentDTOs);
     }
+
 }

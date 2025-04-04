@@ -43,12 +43,6 @@ public class UltramarineRestController {
         return ResponseEntity.ok(dto);
     }
 
-    @PutMapping("/")
-    public ResponseEntity<UltramarineDTO> update(@Valid @RequestBody UltramarineDTO ultramarineDTO) {
-        UltramarineDTO updatedUltramarine = ultramarineService.update(ultramarineDTO);
-        return ResponseEntity.ok(updatedUltramarine);
-    }
-
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> delete(@PathVariable int id) {
         ultramarineService.delete(id);

@@ -33,8 +33,8 @@ public class JwtUtil {
 
     private final String secretKey;
 
-    private static final long ACCESS_TOKEN_EXPIRATION = 60000; // 1 minute
-    private static final long REFRESH_TOKEN_EXPIRATION = 600000; // 10 minutes
+    private static final long ACCESS_TOKEN_EXPIRATION = 600000; // 10 minute
+    private static final long REFRESH_TOKEN_EXPIRATION = 6000000; // 100 minutes
 
     public JwtUtil(@Value("${jwt.secret}") String secretKey) {
         this.secretKey = secretKey;
