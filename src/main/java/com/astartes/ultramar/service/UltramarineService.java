@@ -74,18 +74,17 @@ public class UltramarineService {
 
     /**
      * Mettre à jour un Ultramarine
-     * @param id
      * @param dto
      * @return
      */
     @Transactional
-    public UltramarineDTO update(int id, UltramarineDTO dto) {
-        return repository.findById(id).map(existing -> {
+    public UltramarineDTO update(UltramarineDTO dto) {
+        return repository.findById(dto.id()).map(existing -> {
             existing.setName(dto.name());
             existing.setGrade(dto.grade());
             repository.save(existing);
             return ultramarineMapper.toDTO(existing);
-        }).orElseThrow(() -> new UltramarineUpdateException(id));
+        }).orElseThrow(() -> new UltramarineUpdateException(dto.id()));
     }
 
     /**
