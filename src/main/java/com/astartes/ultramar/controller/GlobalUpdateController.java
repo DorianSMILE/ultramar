@@ -27,11 +27,6 @@ public class GlobalUpdateController {
      */
     @PutMapping("/global")
     public ResponseEntity<UltramarineDTO> updateGlobal(@Valid @RequestBody UltramarineDTO ultramarineDTO) {
-        UltramarineDTO updatedUltramarine = globalUpdateService.updateGlobal(ultramarineDTO);
-        if (updatedUltramarine == null) {
-            return ResponseEntity.notFound().build();
-        } else {
-            return ResponseEntity.ok(updatedUltramarine);
-        }
+        return ResponseEntity.ok(globalUpdateService.updateGlobal(ultramarineDTO));
     }
 }
