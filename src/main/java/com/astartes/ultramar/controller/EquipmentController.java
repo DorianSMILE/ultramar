@@ -4,8 +4,6 @@ import com.astartes.ultramar.DTO.UltramarineDTO;
 import com.astartes.ultramar.enumeration.EquipmentTypeEnum;
 import com.astartes.ultramar.service.EquipmentService;
 import com.astartes.ultramar.service.UltramarineService;
-import jakarta.validation.Valid;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;

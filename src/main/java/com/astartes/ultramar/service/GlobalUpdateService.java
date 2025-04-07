@@ -34,8 +34,10 @@ public class GlobalUpdateService {
         Ultramarine ultramarine = ultramarineRepository.findById(dto.id())
                 .orElseThrow(() -> new UltramarineUpdateException(dto.id()));
 
-        ultramarine.setName(dto.name());
-        ultramarine.setGrade(dto.grade());
+        if(dto.name() != null && dto.grade() != null) {
+            ultramarine.setName(dto.name());
+            ultramarine.setGrade(dto.grade());
+        }
 
         Map<EquipmentTypeEnum, Equipment> newEquipments = new HashMap<>();
         if (dto.equipments() != null) {
@@ -49,9 +51,8 @@ public class GlobalUpdateService {
                                 equipmentDTO.equipmentType() + " - " + equipmentDTO.name()));
                 newEquipments.put(equipment.getEquipmentType(), equipment);
             }
+            ultramarine.setEquipments(newEquipments);
         }
-        ultramarine.setEquipments(newEquipments);
-
         Ultramarine saved = ultramarineRepository.saveAndFlush(ultramarine);
         return ultramarineMapper.toDTO(saved);
     }
