@@ -5,7 +5,6 @@ import com.astartes.ultramar.entity.Ultramarine;
 import com.astartes.ultramar.exception.UltramarineCreationException;
 import com.astartes.ultramar.exception.UltramarineDeleteException;
 import com.astartes.ultramar.exception.UltramarineNotFoundException;
-import com.astartes.ultramar.exception.UltramarineUpdateException;
 import com.astartes.ultramar.mapper.UltramarineMapper;
 import com.astartes.ultramar.repository.UltramarineRepository;
 import org.springframework.stereotype.Service;
