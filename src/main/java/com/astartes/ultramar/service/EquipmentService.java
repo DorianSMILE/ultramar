@@ -44,7 +44,15 @@ public class EquipmentService {
     }
 
     public List<EquipmentDTO> getEquipmentsByType(EquipmentFilterDTO equipmentFilter) {
-        return equipmentMapper.toDto(equipmentRepository.findEquipmentsByFilters(equipmentFilter.equipmentType(), equipmentFilter.supply(), equipmentFilter.weight()));
+        if (equipmentFilter == null ||
+                (equipmentFilter.equipmentType() == null && equipmentFilter.supply() == null && equipmentFilter.weight() == null)) {
+            return equipmentMapper.toDto(equipmentRepository.findAll());
+        }
+
+        return equipmentMapper.toDto(equipmentRepository.findEquipmentsByFilters(
+                equipmentFilter.equipmentType(),
+                equipmentFilter.supply(),
+                equipmentFilter.weight()));
     }
 
 }
