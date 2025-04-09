@@ -4,6 +4,9 @@ import com.astartes.ultramar.DTO.EquipmentDTO;
 import com.astartes.ultramar.entity.Equipment;
 import org.springframework.stereotype.Component;
 
+import java.util.List;
+import java.util.stream.Collectors;
+
 @Component
 public class EquipmentMapper {
 
@@ -24,6 +27,16 @@ public class EquipmentMapper {
         if (entity == null) {
             return null;
         }
-        return new EquipmentDTO(entity.getId(), entity.getName(), entity.getEquipmentType());
+        return new EquipmentDTO(
+                entity.getId(),
+                entity.getName(),
+                entity.getEquipmentType()
+        );
+    }
+
+    public List<EquipmentDTO> toDto(List<Equipment> entities) {
+        return entities.stream()
+                .map(this::toDto)
+                .collect(Collectors.toList());
     }
 }

@@ -1,6 +1,8 @@
 package com.astartes.ultramar.entity;
 
 import com.astartes.ultramar.enumeration.EquipmentTypeEnum;
+import com.astartes.ultramar.enumeration.SupplyEnum;
+import com.astartes.ultramar.enumeration.WeightEnum;
 import jakarta.persistence.*;
 import lombok.Data;
 
@@ -21,6 +23,12 @@ public class Equipment {
 
     @Enumerated(EnumType.STRING)
     private EquipmentTypeEnum equipmentType;
+
+    @Enumerated(EnumType.STRING)
+    private SupplyEnum supply;
+
+    @Enumerated(EnumType.STRING)
+    private WeightEnum weight;
 
     @ManyToMany(mappedBy = "equipments")
     private Set<Ultramarine> ultramarines = new HashSet<>();
