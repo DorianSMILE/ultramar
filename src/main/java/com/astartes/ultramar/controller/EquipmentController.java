@@ -36,9 +36,6 @@ public class EquipmentController {
 
     @PostMapping("/filtre")
     public List<EquipmentDTO> getUltramarineEquipmentsFiltre(@RequestBody(required = false) EquipmentFilterDTO equipmentFilter) {
-        if (equipmentFilter == null) {
-            equipmentFilter = new EquipmentFilterDTO(null, null, null);
-        }
         return equipmentService.getEquipmentsByType(equipmentFilter);
     }
 

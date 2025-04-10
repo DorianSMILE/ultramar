@@ -20,6 +20,8 @@ public class EquipmentMapper {
         }
         equipment.setName(dto.name());
         equipment.setEquipmentType(dto.equipmentType());
+        equipment.setSupply(dto.supply());
+        equipment.setWeight(dto.weight());
         return equipment;
     }
 
@@ -30,7 +32,9 @@ public class EquipmentMapper {
         return new EquipmentDTO(
                 entity.getId(),
                 entity.getName(),
-                entity.getEquipmentType()
+                entity.getEquipmentType(),
+                entity.getSupply(),
+                entity.getWeight()
         );
     }
 
