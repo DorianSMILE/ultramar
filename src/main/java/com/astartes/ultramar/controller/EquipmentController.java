@@ -1,5 +1,7 @@
 package com.astartes.ultramar.controller;
 
+import com.astartes.ultramar.DTO.EquipmentDTO;
+import com.astartes.ultramar.DTO.EquipmentFilterDTO;
 import com.astartes.ultramar.DTO.UltramarineDTO;
 import com.astartes.ultramar.enumeration.EquipmentTypeEnum;
 import com.astartes.ultramar.service.EquipmentService;
@@ -30,6 +32,11 @@ public class EquipmentController {
     public Map<EquipmentTypeEnum, String> getUltramarineEquipments(@PathVariable("id") int id) {
         UltramarineDTO ultramarineDTO = ultramarineService.getById(id);
         return equipmentService.getUltramarineEquipments(ultramarineDTO);
+    }
+
+    @PostMapping("/filtre")
+    public List<EquipmentDTO> getUltramarineEquipmentsFiltre(@RequestBody(required = false) EquipmentFilterDTO equipmentFilter) {
+        return equipmentService.getEquipmentsByType(equipmentFilter);
     }
 
 }

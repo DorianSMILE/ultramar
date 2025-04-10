@@ -40,7 +40,7 @@ public class UltramarineMapper {
     public UltramarineDTO toDTO(Ultramarine ultramarine) {
         Map<EquipmentTypeEnum, Equipment> equipments = new HashMap<>(ultramarine.getEquipments());
         List<EquipmentDTO> equipmentDTOs = equipments.values().stream()
-                .map(equipment -> new EquipmentDTO(equipment.getId(), equipment.getName(), equipment.getEquipmentType()))
+                .map(equipment -> new EquipmentDTO(equipment.getId(), equipment.getName(), equipment.getEquipmentType(), equipment.getSupply(), equipment.getWeight()))
                 .collect(Collectors.toList());
         return new UltramarineDTO(ultramarine.getId(), ultramarine.getName(), ultramarine.getGrade(), equipmentDTOs);
     }

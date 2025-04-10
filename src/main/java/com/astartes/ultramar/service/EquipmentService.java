@@ -1,9 +1,11 @@
 package com.astartes.ultramar.service;
 
 import com.astartes.ultramar.DTO.EquipmentDTO;
+import com.astartes.ultramar.DTO.EquipmentFilterDTO;
 import com.astartes.ultramar.DTO.UltramarineDTO;
 import com.astartes.ultramar.entity.Equipment;
 import com.astartes.ultramar.enumeration.EquipmentTypeEnum;
+import com.astartes.ultramar.mapper.EquipmentMapper;
 import com.astartes.ultramar.repository.EquipmentRepository;
 import org.springframework.stereotype.Service;
 
@@ -15,9 +17,11 @@ import java.util.stream.Collectors;
 public class EquipmentService {
 
     private final EquipmentRepository equipmentRepository;
+    private final EquipmentMapper equipmentMapper;
 
-    public EquipmentService(EquipmentRepository equipmentRepository) {
+    public EquipmentService(EquipmentRepository equipmentRepository, EquipmentMapper equipmentMapper) {
         this.equipmentRepository = equipmentRepository;
+        this.equipmentMapper = equipmentMapper;
     }
 
     public Map<EquipmentTypeEnum, List<String>> getAvailableEquipmentsGroupedByType() {
@@ -37,6 +41,18 @@ public class EquipmentService {
                         EquipmentDTO::name,
                         (existing, replacement) -> existing
                 ));
+    }
+
+    public List<EquipmentDTO> getEquipmentsByType(EquipmentFilterDTO equipmentFilter) {
+        if (equipmentFilter == null ||
+                (equipmentFilter.equipmentType() == null && equipmentFilter.supply() == null && equipmentFilter.weight() == null)) {
+            return equipmentMapper.toDto(equipmentRepository.findAll());
+        }
+
+        return equipmentMapper.toDto(equipmentRepository.findEquipmentsByFilters(
+                equipmentFilter.equipmentType(),
+                equipmentFilter.supply(),
+                equipmentFilter.weight()));
     }
 
 }
