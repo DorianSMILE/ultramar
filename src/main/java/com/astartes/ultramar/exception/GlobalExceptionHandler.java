@@ -67,5 +67,10 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ex.getMessage());
     }
 
+    @ExceptionHandler(EquipmentNotAuthorizedException.class)
+    public ResponseEntity<String> handleEquipmentNotAuthorizedException(EquipmentNotAuthorizedException ex) {
+        return ResponseEntity.status(HttpStatus.NOT_ACCEPTABLE).body(ex.getMessage());
+    }
+
 }
 

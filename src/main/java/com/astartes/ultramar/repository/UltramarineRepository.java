@@ -4,9 +4,9 @@ import com.astartes.ultramar.entity.Ultramarine;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
-import java.util.Optional;
+import java.util.List;
 
 @Repository
 public interface UltramarineRepository extends JpaRepository<Ultramarine, Integer> {
-    Optional<Ultramarine> findByNameContainingIgnoreCase(String name);
+    List<Ultramarine> findByNameContainingIgnoreCase(String name);
 }
