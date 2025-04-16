@@ -1,11 +1,11 @@
 package com.astartes.ultramar.controller;
 
-import com.astartes.ultramar.DTO.UltramarineAuthorizationDTO;
+import com.astartes.ultramar.DTO.EquipmentAuthorizationDTO;
 import com.astartes.ultramar.service.EquipmentAuthorizationService;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/ultramarines/authorizations")
@@ -18,8 +18,33 @@ public class AuthorizationEquipmentController {
     }
 
     @GetMapping("/{id}")
-    public UltramarineAuthorizationDTO getAuthorizations(@PathVariable("id") int ultramarineId) {
-        return authService.getAuthorizationsForUltramarine(ultramarineId);
+    public ResponseEntity<EquipmentAuthorizationDTO> getByUltramarineId(@PathVariable("id") int ultramarineId) {
+        EquipmentAuthorizationDTO dto = authService.getAuthorizationsForUltramarine(ultramarineId);
+        return ResponseEntity.ok(dto);
     }
+
+    @GetMapping
+    public ResponseEntity<List<EquipmentAuthorizationDTO>> getAll() {
+        List<EquipmentAuthorizationDTO> allDtos = authService.findAll();
+        return ResponseEntity.ok(allDtos);
+    }
+
+
+    @PutMapping("/{id}")
+    public ResponseEntity<EquipmentAuthorizationDTO> update(@PathVariable Long id, @RequestBody EquipmentAuthorizationDTO dto) {
+        return authService.findById(id).map(
+                existing -> ResponseEntity.ok(authService.getAuthorizationsForUltramarine(existing.getUltramarineId()))).
+                orElse(ResponseEntity.notFound().build());
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> delete(@PathVariable Long id) {
+        if (authService.findById(id).isPresent()) {
+            authService.delete(id);
+            return ResponseEntity.noContent().build();
+        }
+        return ResponseEntity.notFound().build();
+    }
+
 
 }
