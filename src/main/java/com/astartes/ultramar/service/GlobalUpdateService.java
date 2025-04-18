@@ -76,9 +76,9 @@ public class GlobalUpdateService {
     private class EquipmentVerificationContext {
         private final Map<String, Integer> supplyCountMap = new HashMap<>();
         private final Map<String, Integer> weightCountMap = new HashMap<>();
-        private final int ultramarineId;
+        private final Long ultramarineId;
 
-        EquipmentVerificationContext(int ultramarineId) {
+        EquipmentVerificationContext(Long ultramarineId) {
             this.ultramarineId = ultramarineId;
         }
 

@@ -1,84 +1,171 @@
 package com.astartes.ultramar.service;
 
-
-import com.astartes.ultramar.DTO.UltramarineAuthorizationDTO;
+import com.astartes.ultramar.DTO.EquipmentAuthorizationDTO;
 import com.astartes.ultramar.entity.EquipmentAuthorization;
+import com.astartes.ultramar.entity.Ultramarine;
 import com.astartes.ultramar.enumeration.SupplyEnum;
 import com.astartes.ultramar.enumeration.WeightEnum;
 import com.astartes.ultramar.exception.EquipmentNotFoundException;
 import com.astartes.ultramar.repository.EquipmentAuthorizationRepository;
+import com.astartes.ultramar.repository.UltramarineRepository;
+import jakarta.persistence.EntityNotFoundException;
+import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
 
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 public class EquipmentAuthorizationService {
 
     private final EquipmentAuthorizationRepository authRepository;
+    private final UltramarineRepository ultramarineRepository;
 
-    public EquipmentAuthorizationService(EquipmentAuthorizationRepository authRepository) {
+    public EquipmentAuthorizationService(EquipmentAuthorizationRepository authRepository, UltramarineRepository ultramarineRepository) {
         this.authRepository = authRepository;
+        this.ultramarineRepository = ultramarineRepository;
     }
 
     /**
      * Vérifie si l'ultramarine est autorisé à porter un équipement de la catégorie indiquée,
      * en comparant le nombre courant d'équipements portés avec le nombre autorisé.
-     *
-     * @param ultramarineId l'ID de l'ultramarine
-     * @param category La catégorie autorisée (correspond à une valeur de SupplyEnum ou WeightEnum)
-     * @param currentCount Le nombre d'équipements déjà portés dans cette catégorie
-     * @return true si l'ajout d'un équipement est autorisé, false sinon
      */
-    public boolean isAuthorized(int ultramarineId, String category, int currentCount) {
+    public boolean isAuthorized(Long ultramarineId, String category, int currentCount) {
         EquipmentAuthorization auth = authRepository.findByUltramarineIdAndCategory(ultramarineId, category);
         if (auth == null) {
-            // Aucun enregistrement pour cette catégorie signifie l'absence d'autorisation.
             throw new EquipmentNotFoundException("Aucune autorisation trouvée pour l'ultramarine " + ultramarineId + " et la catégorie " + category);
         }
         if (auth.getNbAuthorized() == null) {
-            // Null signifie que l'autorisation est illimitée.
-            return false;
+            return false; // illimité → jamais bloquant
         }
         return currentCount > auth.getNbAuthorized();
     }
 
-    public UltramarineAuthorizationDTO getAuthorizationsForUltramarine(int ultramarineId) {
+    /**
+     * Retourne les autorisations (supply & weight) pour un ultramarine donné, formatées en DTO.
+     */
+    public EquipmentAuthorizationDTO getAuthorizationsForUltramarine(long ultramarineId) {
         List<EquipmentAuthorization> auths = authRepository.findByUltramarineId(ultramarineId);
+        return toDTO(ultramarineId, auths);
+    }
 
-        // Pour conserver l'ordre, utilise LinkedHashMap
+    public List<EquipmentAuthorizationDTO> findAll() {
+        List<EquipmentAuthorization> all = authRepository.findAll();
+
+        return all.stream()
+                .collect(Collectors.groupingBy(auth -> auth.getUltramarine().getId()))
+                .entrySet().stream()
+                .map(entry -> toDTO((long) entry.getKey(), entry.getValue()))
+                .collect(Collectors.toList());
+    }
+
+
+    public Optional<EquipmentAuthorizationDTO> findById(Long id) {
+        return authRepository.findById(id)
+                .map(auth -> {
+                    Long umId = (long) auth.getUltramarine().getId();
+                    List<EquipmentAuthorization> auths = authRepository.findByUltramarineId(umId);
+                    return toDTO(umId, auths);
+                });
+    }
+
+    public List<EquipmentAuthorizationDTO> findByUltramarineId(Long umId) {
+        List<EquipmentAuthorization> auths = authRepository.findByUltramarineId(umId);
+        if (auths.isEmpty()) return Collections.emptyList();
+        return List.of(toDTO(umId, auths));
+    }
+
+    @Transactional
+    public Optional<EquipmentAuthorizationDTO> updateAuthorization(EquipmentAuthorizationDTO dto) {
+        Long id = (long) dto.getUltramarineId();
+        authRepository.deleteAllByUltramarineId(id);
+        List<EquipmentAuthorization> newAuthorizations = toEntities(dto);
+        List<EquipmentAuthorization> saved = authRepository.saveAll(newAuthorizations);
+        return Optional.of(toDTO(dto.getUltramarineId(), saved));
+    }
+
+    public void delete(Long id) {
+        authRepository.deleteById(id);
+    }
+
+    /**
+     * Méthode interne réutilisable pour transformer une liste d'autorisations en DTO,
+     * en complétant les manquants avec "unautorized" ou "illimité".
+     */
+    private EquipmentAuthorizationDTO toDTO(Long ultramarineId, List<EquipmentAuthorization> auths) {
         Map<String, String> supplyMap = new LinkedHashMap<>();
         Map<String, String> weightMap = new LinkedHashMap<>();
 
-        // Pour chaque valeur de SupplyEnum on détermine l'autorisation
         for (SupplyEnum s : SupplyEnum.values()) {
             EquipmentAuthorization auth = auths.stream()
                     .filter(a -> a.getCategory().equals(s.name()))
                     .findFirst()
                     .orElse(null);
-            if (auth == null) {
-                supplyMap.put(s.name(), "unautorized");
-            } else {
-                // Si nbAuthorized est null, on considère "illimité", sinon la valeur numérique
-                supplyMap.put(s.name(), auth.getNbAuthorized() == null ? "illimité" : auth.getNbAuthorized().toString());
-            }
+            supplyMap.put(s.name(), auth == null ? "unautorized" :
+                    auth.getNbAuthorized() == null ? "unlimited" : auth.getNbAuthorized().toString());
         }
 
-        // Pareil pour WeightEnum
         for (WeightEnum w : WeightEnum.values()) {
             EquipmentAuthorization auth = auths.stream()
                     .filter(a -> a.getCategory().equals(w.name()))
                     .findFirst()
                     .orElse(null);
-            if (auth == null) {
-                weightMap.put(w.name(), "unautorized");
-            } else {
-                weightMap.put(w.name(), auth.getNbAuthorized() == null ? "illimité" : auth.getNbAuthorized().toString());
-            }
+            weightMap.put(w.name(), auth == null ? "unautorized" :
+                    auth.getNbAuthorized() == null ? "unlimited" : auth.getNbAuthorized().toString());
         }
 
-        return new UltramarineAuthorizationDTO(ultramarineId, supplyMap, weightMap);
+        return new EquipmentAuthorizationDTO(ultramarineId, supplyMap, weightMap);
+    }
+
+    private List<EquipmentAuthorization> toEntities(EquipmentAuthorizationDTO dto) {
+        List<EquipmentAuthorization> entities = new ArrayList<>();
+
+        Ultramarine ultramarine = ultramarineRepository.findById(dto.getUltramarineId())
+                .orElseThrow(() -> new EntityNotFoundException("Ultramarine not found with ID: " + dto.getUltramarineId()));
+
+        dto.getWeightAuthorizations().forEach((category, value) -> {
+            if ("unautorized".equals(value)) return;
+
+            Long parsedValue = null;
+            if (!"unlimited".equals(value)) {
+                try {
+                    parsedValue = Long.parseLong(value);
+                } catch (NumberFormatException e) {
+                    throw new IllegalArgumentException("Valeur invalide pour la catégorie " + category + " : " + value);
+                }
+            }
+            entities.add(createEntity(ultramarine, category, parsedValue));
+        });
+
+        dto.getSupplyAuthorizations().forEach((category, value) -> {
+            if ("unautorized".equals(value)) return;
+
+            Long parsedValue = null;
+            if (!"unlimited".equals(value)) {
+                try {
+                    parsedValue = Long.parseLong(value);
+                } catch (NumberFormatException e) {
+                    throw new IllegalArgumentException("Valeur invalide pour la catégorie " + category + " : " + value);
+                }
+            }
+            entities.add(createEntity(ultramarine, category, parsedValue));
+        });
+
+        return entities;
+    }
+
+    private EquipmentAuthorization createEntity(Ultramarine ultramarine, String fullCategory, Long parsedValue) {
+        EquipmentAuthorization auth = new EquipmentAuthorization();
+        auth.setUltramarine(ultramarine);
+        auth.setCategory(fullCategory);
+
+        if (parsedValue == null) {
+            auth.setNbAuthorized(null);
+        } else {
+            auth.setNbAuthorized(parsedValue.intValue());
+        }
+
+        return auth;
     }
 
 }

@@ -7,6 +7,6 @@ import org.springframework.stereotype.Repository;
 import java.util.List;
 
 @Repository
-public interface UltramarineRepository extends JpaRepository<Ultramarine, Integer> {
+public interface UltramarineRepository extends JpaRepository<Ultramarine, Long> {
     List<Ultramarine> findByNameContainingIgnoreCase(String name);
 }

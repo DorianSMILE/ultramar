@@ -8,6 +8,7 @@ import java.util.List;
 
 @Repository
 public interface EquipmentAuthorizationRepository extends JpaRepository<EquipmentAuthorization, Long> {
-    EquipmentAuthorization findByUltramarineIdAndCategory(int ultramarineId, String category);
-    List<EquipmentAuthorization> findByUltramarineId(int ultramarineId);
+    EquipmentAuthorization findByUltramarineIdAndCategory(Long ultramarineId, String category);
+    List<EquipmentAuthorization> findByUltramarineId(Long ultramarineId);
+    void deleteAllByUltramarineId(Long ultramarineId);
 }

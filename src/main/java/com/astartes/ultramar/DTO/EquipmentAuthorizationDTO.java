@@ -5,12 +5,12 @@ import lombok.Data;
 import java.util.Map;
 
 @Data
-public class UltramarineAuthorizationDTO {
-    private int ultramarineId;
+public class EquipmentAuthorizationDTO {
+    private Long ultramarineId;
     private Map<String, String> supplyAuthorizations;
     private Map<String, String> weightAuthorizations;
 
-    public UltramarineAuthorizationDTO(int ultramarineId, Map<String, String> supplyMap, Map<String, String> weightMap) {
+    public EquipmentAuthorizationDTO(Long ultramarineId, Map<String, String> supplyMap, Map<String, String> weightMap) {
         this.ultramarineId = ultramarineId;
         this.supplyAuthorizations = supplyMap;
         this.weightAuthorizations = weightMap;

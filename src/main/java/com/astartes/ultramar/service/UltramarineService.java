@@ -65,7 +65,7 @@ public class UltramarineService {
      * @param id
      * @return
      */
-    public UltramarineDTO getById(int id) {
+    public UltramarineDTO getById(Long id) {
         return repository.findById(id)
                 .map(ultramarineMapper::toDTO)
                 .orElseThrow(() -> new UltramarineNotFoundException(id));
@@ -77,7 +77,7 @@ public class UltramarineService {
      * @return
      */
     @Transactional
-    public void delete(int id) {
+    public void delete(Long id) {
         if (repository.existsById(id)) {
             repository.deleteById(id);
         } else {
