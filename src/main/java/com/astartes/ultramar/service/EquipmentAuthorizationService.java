@@ -6,6 +6,7 @@ import com.astartes.ultramar.enumeration.SupplyEnum;
 import com.astartes.ultramar.enumeration.WeightEnum;
 import com.astartes.ultramar.exception.EquipmentNotFoundException;
 import com.astartes.ultramar.repository.EquipmentAuthorizationRepository;
+import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
@@ -79,8 +80,13 @@ public class EquipmentAuthorizationService {
         return List.of(toDTO(umId, auths));
     }
 
-    public EquipmentAuthorization save(EquipmentAuthorization auth) {
-        return authRepository.save(auth);
+    @Transactional
+    public Optional<EquipmentAuthorizationDTO> updateAuthorization(EquipmentAuthorizationDTO dto) {
+        Long id = (long) dto.getUltramarineId();
+        authRepository.deleteAllByUltramarineId(id);
+        List<EquipmentAuthorization> newAuthorizations = toEntities(dto);
+        List<EquipmentAuthorization> saved = authRepository.saveAll(newAuthorizations);
+        return Optional.of(toDTO(dto.getUltramarineId(), saved));
     }
 
     public void delete(Long id) {
@@ -101,7 +107,7 @@ public class EquipmentAuthorizationService {
                     .findFirst()
                     .orElse(null);
             supplyMap.put(s.name(), auth == null ? "unautorized" :
-                    auth.getNbAuthorized() == null ? "illimité" : auth.getNbAuthorized().toString());
+                    auth.getNbAuthorized() == null ? "unlimited" : auth.getNbAuthorized().toString());
         }
 
         for (WeightEnum w : WeightEnum.values()) {
@@ -110,9 +116,62 @@ public class EquipmentAuthorizationService {
                     .findFirst()
                     .orElse(null);
             weightMap.put(w.name(), auth == null ? "unautorized" :
-                    auth.getNbAuthorized() == null ? "illimité" : auth.getNbAuthorized().toString());
+                    auth.getNbAuthorized() == null ? "unlimited" : auth.getNbAuthorized().toString());
         }
 
         return new EquipmentAuthorizationDTO(ultramarineId, supplyMap, weightMap);
     }
+
+    private List<EquipmentAuthorization> toEntities(EquipmentAuthorizationDTO dto) {
+        List<EquipmentAuthorization> entities = new ArrayList<>();
+
+        dto.getWeightAuthorizations().forEach((category, value) -> {
+            if ("unautorized".equals(value)) {
+                return;
+            }
+            Long parsedValue = null;
+            if (!"unlimited".equals(value)) {
+                try {
+                    parsedValue = Long.parseLong(value);
+                } catch (NumberFormatException e) {
+                    throw new IllegalArgumentException("Valeur invalide pour la catégorie " + category + " : " + value);
+                }
+            }
+            entities.add(createEntity(dto.getUltramarineId(), category, parsedValue));
+        });
+
+        dto.getSupplyAuthorizations().forEach((category, value) -> {
+            if ("unautorized".equals(value)) {
+                return;
+            }
+            Long parsedValue = null;
+            if (!"unlimited".equals(value)) {
+                try {
+                    parsedValue = Long.parseLong(value);
+                } catch (NumberFormatException e) {
+                    throw new IllegalArgumentException("Valeur invalide pour la catégorie " + category + " : " + value);
+                }
+            }
+            entities.add(createEntity(dto.getUltramarineId(), category, parsedValue));
+        });
+
+
+        return entities;
+    }
+
+
+    private EquipmentAuthorization createEntity(int ultramarineId, String fullCategory, Long parsedValue) {
+        EquipmentAuthorization auth = new EquipmentAuthorization();
+        auth.setUltramarineId(ultramarineId);
+        auth.setCategory(fullCategory);
+
+        if (parsedValue == null) {
+            auth.setNbAuthorized(null);
+        } else {
+            auth.setNbAuthorized(parsedValue.intValue());
+        }
+
+        return auth;
+    }
+
 }

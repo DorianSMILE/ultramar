@@ -10,4 +10,5 @@ import java.util.List;
 public interface EquipmentAuthorizationRepository extends JpaRepository<EquipmentAuthorization, Long> {
     EquipmentAuthorization findByUltramarineIdAndCategory(int ultramarineId, String category);
     List<EquipmentAuthorization> findByUltramarineId(int ultramarineId);
+    void deleteAllByUltramarineId(Long ultramarineId);
 }

@@ -6,6 +6,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Optional;
 
 @RestController
 @RequestMapping("/ultramarines/authorizations")
@@ -30,11 +31,11 @@ public class AuthorizationEquipmentController {
     }
 
 
-    @PutMapping("/{id}")
-    public ResponseEntity<EquipmentAuthorizationDTO> update(@PathVariable Long id, @RequestBody EquipmentAuthorizationDTO dto) {
-        return authService.findById(id).map(
-                existing -> ResponseEntity.ok(authService.getAuthorizationsForUltramarine(existing.getUltramarineId()))).
-                orElse(ResponseEntity.notFound().build());
+    @PutMapping
+    public ResponseEntity<EquipmentAuthorizationDTO> update(@RequestBody EquipmentAuthorizationDTO dto) {
+        Optional<EquipmentAuthorizationDTO> updated = authService.updateAuthorization(dto);
+        return updated.map(ResponseEntity::ok)
+                .orElse(ResponseEntity.notFound().build());
     }
 
     @DeleteMapping("/{id}")
