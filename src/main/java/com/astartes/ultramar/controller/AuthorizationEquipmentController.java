@@ -19,7 +19,7 @@ public class AuthorizationEquipmentController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<EquipmentAuthorizationDTO> getByUltramarineId(@PathVariable("id") int ultramarineId) {
+    public ResponseEntity<EquipmentAuthorizationDTO> getByUltramarineId(@PathVariable("id") Long ultramarineId) {
         EquipmentAuthorizationDTO dto = authService.getAuthorizationsForUltramarine(ultramarineId);
         return ResponseEntity.ok(dto);
     }
@@ -29,7 +29,6 @@ public class AuthorizationEquipmentController {
         List<EquipmentAuthorizationDTO> allDtos = authService.findAll();
         return ResponseEntity.ok(allDtos);
     }
-
 
     @PutMapping
     public ResponseEntity<EquipmentAuthorizationDTO> update(@RequestBody EquipmentAuthorizationDTO dto) {
@@ -46,6 +45,5 @@ public class AuthorizationEquipmentController {
         }
         return ResponseEntity.notFound().build();
     }
-
 
 }

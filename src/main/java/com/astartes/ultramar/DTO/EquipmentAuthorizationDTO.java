@@ -6,11 +6,11 @@ import java.util.Map;
 
 @Data
 public class EquipmentAuthorizationDTO {
-    private int ultramarineId;
+    private Long ultramarineId;
     private Map<String, String> supplyAuthorizations;
     private Map<String, String> weightAuthorizations;
 
-    public EquipmentAuthorizationDTO(int ultramarineId, Map<String, String> supplyMap, Map<String, String> weightMap) {
+    public EquipmentAuthorizationDTO(Long ultramarineId, Map<String, String> supplyMap, Map<String, String> weightMap) {
         this.ultramarineId = ultramarineId;
         this.supplyAuthorizations = supplyMap;
         this.weightAuthorizations = weightMap;

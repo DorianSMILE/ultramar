@@ -2,10 +2,13 @@ package com.astartes.ultramar.service;
 
 import com.astartes.ultramar.DTO.EquipmentAuthorizationDTO;
 import com.astartes.ultramar.entity.EquipmentAuthorization;
+import com.astartes.ultramar.entity.Ultramarine;
 import com.astartes.ultramar.enumeration.SupplyEnum;
 import com.astartes.ultramar.enumeration.WeightEnum;
 import com.astartes.ultramar.exception.EquipmentNotFoundException;
 import com.astartes.ultramar.repository.EquipmentAuthorizationRepository;
+import com.astartes.ultramar.repository.UltramarineRepository;
+import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
 
@@ -16,16 +19,18 @@ import java.util.stream.Collectors;
 public class EquipmentAuthorizationService {
 
     private final EquipmentAuthorizationRepository authRepository;
+    private final UltramarineRepository ultramarineRepository;
 
-    public EquipmentAuthorizationService(EquipmentAuthorizationRepository authRepository) {
+    public EquipmentAuthorizationService(EquipmentAuthorizationRepository authRepository, UltramarineRepository ultramarineRepository) {
         this.authRepository = authRepository;
+        this.ultramarineRepository = ultramarineRepository;
     }
 
     /**
      * Vérifie si l'ultramarine est autorisé à porter un équipement de la catégorie indiquée,
      * en comparant le nombre courant d'équipements portés avec le nombre autorisé.
      */
-    public boolean isAuthorized(int ultramarineId, String category, int currentCount) {
+    public boolean isAuthorized(Long ultramarineId, String category, int currentCount) {
         EquipmentAuthorization auth = authRepository.findByUltramarineIdAndCategory(ultramarineId, category);
         if (auth == null) {
             throw new EquipmentNotFoundException("Aucune autorisation trouvée pour l'ultramarine " + ultramarineId + " et la catégorie " + category);
@@ -39,42 +44,32 @@ public class EquipmentAuthorizationService {
     /**
      * Retourne les autorisations (supply & weight) pour un ultramarine donné, formatées en DTO.
      */
-    public EquipmentAuthorizationDTO getAuthorizationsForUltramarine(int ultramarineId) {
+    public EquipmentAuthorizationDTO getAuthorizationsForUltramarine(long ultramarineId) {
         List<EquipmentAuthorization> auths = authRepository.findByUltramarineId(ultramarineId);
         return toDTO(ultramarineId, auths);
     }
 
-    /**
-     * Retourne toutes les autorisations groupées par ultramarine et formatées en DTO.
-     */
-    public List<EquipmentAuthorizationDTO> findAllDTO() {
+    public List<EquipmentAuthorizationDTO> findAll() {
         List<EquipmentAuthorization> all = authRepository.findAll();
 
         return all.stream()
-                .collect(Collectors.groupingBy(EquipmentAuthorization::getUltramarineId))
+                .collect(Collectors.groupingBy(auth -> auth.getUltramarine().getId()))
                 .entrySet().stream()
-                .map(entry -> toDTO(entry.getKey(), entry.getValue()))
+                .map(entry -> toDTO((long) entry.getKey(), entry.getValue()))
                 .collect(Collectors.toList());
     }
 
-    public List<EquipmentAuthorizationDTO> findAll() {
-        return authRepository.findAll().stream()
-                .collect(Collectors.groupingBy(EquipmentAuthorization::getUltramarineId))
-                .entrySet().stream()
-                .map(entry -> toDTO(entry.getKey(), entry.getValue()))
-                .collect(Collectors.toList());
-    }
 
     public Optional<EquipmentAuthorizationDTO> findById(Long id) {
         return authRepository.findById(id)
                 .map(auth -> {
-                    int umId = auth.getUltramarineId();
+                    Long umId = (long) auth.getUltramarine().getId();
                     List<EquipmentAuthorization> auths = authRepository.findByUltramarineId(umId);
                     return toDTO(umId, auths);
                 });
     }
 
-    public List<EquipmentAuthorizationDTO> findByUltramarineId(int umId) {
+    public List<EquipmentAuthorizationDTO> findByUltramarineId(Long umId) {
         List<EquipmentAuthorization> auths = authRepository.findByUltramarineId(umId);
         if (auths.isEmpty()) return Collections.emptyList();
         return List.of(toDTO(umId, auths));
@@ -97,7 +92,7 @@ public class EquipmentAuthorizationService {
      * Méthode interne réutilisable pour transformer une liste d'autorisations en DTO,
      * en complétant les manquants avec "unautorized" ou "illimité".
      */
-    private EquipmentAuthorizationDTO toDTO(int ultramarineId, List<EquipmentAuthorization> auths) {
+    private EquipmentAuthorizationDTO toDTO(Long ultramarineId, List<EquipmentAuthorization> auths) {
         Map<String, String> supplyMap = new LinkedHashMap<>();
         Map<String, String> weightMap = new LinkedHashMap<>();
 
@@ -125,10 +120,12 @@ public class EquipmentAuthorizationService {
     private List<EquipmentAuthorization> toEntities(EquipmentAuthorizationDTO dto) {
         List<EquipmentAuthorization> entities = new ArrayList<>();
 
+        Ultramarine ultramarine = ultramarineRepository.findById(dto.getUltramarineId())
+                .orElseThrow(() -> new EntityNotFoundException("Ultramarine not found with ID: " + dto.getUltramarineId()));
+
         dto.getWeightAuthorizations().forEach((category, value) -> {
-            if ("unautorized".equals(value)) {
-                return;
-            }
+            if ("unautorized".equals(value)) return;
+
             Long parsedValue = null;
             if (!"unlimited".equals(value)) {
                 try {
@@ -137,13 +134,12 @@ public class EquipmentAuthorizationService {
                     throw new IllegalArgumentException("Valeur invalide pour la catégorie " + category + " : " + value);
                 }
             }
-            entities.add(createEntity(dto.getUltramarineId(), category, parsedValue));
+            entities.add(createEntity(ultramarine, category, parsedValue));
         });
 
         dto.getSupplyAuthorizations().forEach((category, value) -> {
-            if ("unautorized".equals(value)) {
-                return;
-            }
+            if ("unautorized".equals(value)) return;
+
             Long parsedValue = null;
             if (!"unlimited".equals(value)) {
                 try {
@@ -152,17 +148,15 @@ public class EquipmentAuthorizationService {
                     throw new IllegalArgumentException("Valeur invalide pour la catégorie " + category + " : " + value);
                 }
             }
-            entities.add(createEntity(dto.getUltramarineId(), category, parsedValue));
+            entities.add(createEntity(ultramarine, category, parsedValue));
         });
-
 
         return entities;
     }
 
-
-    private EquipmentAuthorization createEntity(int ultramarineId, String fullCategory, Long parsedValue) {
+    private EquipmentAuthorization createEntity(Ultramarine ultramarine, String fullCategory, Long parsedValue) {
         EquipmentAuthorization auth = new EquipmentAuthorization();
-        auth.setUltramarineId(ultramarineId);
+        auth.setUltramarine(ultramarine);
         auth.setCategory(fullCategory);
 
         if (parsedValue == null) {

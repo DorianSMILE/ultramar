@@ -5,7 +5,7 @@ import jakarta.validation.constraints.Pattern;
 import java.util.List;
 
 public record UltramarineDTO(
-    Integer id,
+    Long id,
     @Pattern(regexp = "^[A-Za-zÀ-ÿ\\s-]+$", message = "Name should contain only letters, spaces, or hyphens")
     String name,
     @Pattern(regexp = "^[A-Za-zÀ-ÿ\\s-]+$", message = "Grade should contain only letters, spaces, or hyphens")

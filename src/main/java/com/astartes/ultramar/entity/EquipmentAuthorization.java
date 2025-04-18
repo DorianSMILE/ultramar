@@ -12,8 +12,9 @@ public class EquipmentAuthorization {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "um_id", nullable = false)
-    private int ultramarineId;
+    @ManyToOne
+    @JoinColumn(name = "ultramarine_id", nullable = false)
+    private Ultramarine ultramarine;
 
     @Column(name = "categ_auth", nullable = false)
     private String category;

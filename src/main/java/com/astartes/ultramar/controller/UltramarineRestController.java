@@ -38,13 +38,13 @@ public class UltramarineRestController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<UltramarineDTO> getById(@PathVariable @NotNull int id) {
+    public ResponseEntity<UltramarineDTO> getById(@PathVariable @NotNull Long id) {
         UltramarineDTO dto = ultramarineService.getById(id);
         return ResponseEntity.ok(dto);
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> delete(@PathVariable int id) {
+    public ResponseEntity<Void> delete(@PathVariable Long id) {
         ultramarineService.delete(id);
         return ResponseEntity.noContent().build();
     }

@@ -6,7 +6,9 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 @Data
@@ -17,7 +19,7 @@ import java.util.Map;
 public class Ultramarine {
 
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
-    int id;
+    Long id;
 
     String name;
     String grade;
@@ -30,6 +32,10 @@ public class Ultramarine {
     )
     @MapKey(name = "equipmentType")
     private Map<EquipmentTypeEnum, Equipment> equipments = new HashMap<>();
+
+    @OneToMany(mappedBy = "ultramarine", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<EquipmentAuthorization> equipmentAuthorizations = new ArrayList<>();
+
 
     public Ultramarine(String name, String grade, Map<EquipmentTypeEnum, Equipment> equipements) {
         this.name = name;

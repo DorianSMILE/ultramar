@@ -29,7 +29,7 @@ public class EquipmentController {
     }
 
     @GetMapping("/ultramarine/{id}")
-    public Map<EquipmentTypeEnum, String> getUltramarineEquipments(@PathVariable("id") int id) {
+    public Map<EquipmentTypeEnum, String> getUltramarineEquipments(@PathVariable("id") Long id) {
         UltramarineDTO ultramarineDTO = ultramarineService.getById(id);
         return equipmentService.getUltramarineEquipments(ultramarineDTO);
     }
