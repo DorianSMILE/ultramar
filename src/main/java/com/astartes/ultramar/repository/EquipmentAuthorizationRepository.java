@@ -11,4 +11,5 @@ public interface EquipmentAuthorizationRepository extends JpaRepository<Equipmen
     EquipmentAuthorization findByUltramarineIdAndCategory(Long ultramarineId, String category);
     List<EquipmentAuthorization> findByUltramarineId(Long ultramarineId);
     void deleteAllByUltramarineId(Long ultramarineId);
+    boolean existsByUltramarineId(Long ultramarineId);
 }
