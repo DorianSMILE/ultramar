@@ -1,6 +1,7 @@
 package com.astartes.ultramar.service;
 
 import com.astartes.ultramar.DTO.EquipmentAuthorizationDTO;
+import com.astartes.ultramar.DTO.UltramarineSelectDTO;
 import com.astartes.ultramar.entity.EquipmentAuthorization;
 import com.astartes.ultramar.entity.Ultramarine;
 import com.astartes.ultramar.enumeration.SupplyEnum;
@@ -77,7 +78,7 @@ public class EquipmentAuthorizationService {
 
     @Transactional
     public Optional<EquipmentAuthorizationDTO> updateAuthorization(EquipmentAuthorizationDTO dto) {
-        Long id = (long) dto.getUltramarineId();
+        Long id = dto.getUltramarineId();
         authRepository.deleteAllByUltramarineId(id);
         List<EquipmentAuthorization> newAuthorizations = toEntities(dto);
         List<EquipmentAuthorization> saved = authRepository.saveAll(newAuthorizations);
@@ -130,10 +131,14 @@ public class EquipmentAuthorizationService {
             if (!"unlimited".equals(value)) {
                 try {
                     parsedValue = Long.parseLong(value);
+                    if (parsedValue <= 0) {
+                        throw new IllegalArgumentException("La valeur pour la catégorie " + category + " doit être supérieure à 0.");
+                    }
                 } catch (NumberFormatException e) {
                     throw new IllegalArgumentException("Valeur invalide pour la catégorie " + category + " : " + value);
                 }
             }
+
             entities.add(createEntity(ultramarine, category, parsedValue));
         });
 
@@ -144,10 +149,14 @@ public class EquipmentAuthorizationService {
             if (!"unlimited".equals(value)) {
                 try {
                     parsedValue = Long.parseLong(value);
+                    if (parsedValue <= 0) {
+                        throw new IllegalArgumentException("La valeur pour la catégorie " + category + " doit être supérieure à 0.");
+                    }
                 } catch (NumberFormatException e) {
                     throw new IllegalArgumentException("Valeur invalide pour la catégorie " + category + " : " + value);
                 }
             }
+
             entities.add(createEntity(ultramarine, category, parsedValue));
         });
 
@@ -166,6 +175,23 @@ public class EquipmentAuthorizationService {
         }
 
         return auth;
+    }
+
+    public List<UltramarineSelectDTO> findUltramarinesWithoutAuthorization() {
+        List<Ultramarine> all = ultramarineRepository.findAll();
+        return all.stream()
+                .filter(this::hasNoAuthorization)
+                .map(um -> new UltramarineSelectDTO(um.getId(), um.getName()))
+                .toList();
+    }
+
+    private boolean hasNoAuthorization(Ultramarine um) {
+        return !authRepository.existsByUltramarineId(um.getId());
+    }
+
+    @Transactional
+    public void deleteAllAuthorizationUltramarine(Long ultramarineId) {
+        authRepository.deleteAllByUltramarineId(ultramarineId);
     }
 
 }
