@@ -189,4 +189,9 @@ public class EquipmentAuthorizationService {
         return !authRepository.existsByUltramarineId(um.getId());
     }
 
+    @Transactional
+    public void deleteAllAuthorizationUltramarine(Long ultramarineId) {
+        authRepository.deleteAllByUltramarineId(ultramarineId);
+    }
+
 }

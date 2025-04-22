@@ -39,13 +39,10 @@ public class AuthorizationEquipmentController {
                 .orElse(ResponseEntity.notFound().build());
     }
 
-    @DeleteMapping("/{id}")
-    public ResponseEntity<Void> delete(@PathVariable Long id) {
-        if (authService.findById(id).isPresent()) {
-            authService.delete(id);
-            return ResponseEntity.noContent().build();
-        }
-        return ResponseEntity.notFound().build();
+    @DeleteMapping("/{ultramarineId}")
+    public ResponseEntity<Void> deleteByUltramarineId(@PathVariable Long ultramarineId) {
+        authService.deleteAllAuthorizationUltramarine(ultramarineId);
+        return ResponseEntity.noContent().build();
     }
 
     @GetMapping("/unauthorized")
