@@ -17,11 +17,11 @@ public interface EquipmentRepository extends JpaRepository<Equipment, Integer> {
     Optional<Equipment> findByEquipmentTypeAndName(EquipmentTypeEnum equipmentType, String name);
 
     @Query("SELECT e FROM Equipment e " +
-            "WHERE (:equipmentType IS NULL OR e.equipmentType = :equipmentType) " +
-            "AND (:supply IS NULL OR e.supply = :supply) " +
-            "AND (:weight IS NULL OR e.weight = :weight)")
-    List<Equipment> findEquipmentsByFilters(@Param("equipmentType") EquipmentTypeEnum equipmentType,
-                                            @Param("supply") SupplyEnum supply,
-                                            @Param("weight") WeightEnum weight);
+            "WHERE (:equipmentTypes IS NULL OR e.equipmentType IN :equipmentTypes) " +
+            "AND (:supplies IS NULL OR e.supply IN :supplies) " +
+            "AND (:weights IS NULL OR e.weight IN :weights)")
+    List<Equipment> findEquipmentsByFilters(@Param("equipmentTypes") List<EquipmentTypeEnum> equipmentTypes,
+                                            @Param("supplies") List<SupplyEnum> supplies,
+                                            @Param("weights") List<WeightEnum> weights);
 
 }
